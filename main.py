@@ -21,7 +21,60 @@ class DemoSpider(scrapy.Spider):
         # open_in_browser(response)
 
     def parseResults(self, response):
-        test = response.xpath("//div[@id='ctl00_PlaceHolderMain_RecordSearchResultInfo_noDataMessageForSearchResultList_messageBar']")
-        test2 = response.xpath("//table[@id='ctl00_PlaceHolderMain_dgvPermitList_gdvPermitList']")
-        print("RESULTS", test, test2)
-        open_in_browser(response)
+        results_empty = response.xpath("//div[@id='ctl00_PlaceHolderMain_RecordSearchResultInfo_noDataMessageForSearchResultList_messageBar']").get()
+        records_rows = response.xpath("//table[@id='ctl00_PlaceHolderMain_dgvPermitList_gdvPermitList']/tr")
+
+        # Make sure that the page format is as expected.
+        # we expect that there's either no records with a message explaining that, or there are records without a message.
+        # If that's not true, it's likely that the page format has changed and this spider needs to be updated.
+        if results_empty:
+            assert len(records_rows) == 0, "Expected no records, but records were found"
+        else:
+            assert len(records_rows) > 0, "Expected records, but none were found"
+
+        # if there are records, extract them
+        if records_rows:
+            records = self.extractRecords(response, records_rows)
+            for record in records:
+                print(record)
+
+
+    def extractRecords(self, response, records_rows):
+        records = []
+        for row in records_rows:
+            # if this row is a header row, skip it
+            if row.xpath(".//th"):
+                continue
+
+            # if this row is the pagination row, skip it
+            if row.xpath(".//table"):
+                continue
+
+            # select the data we want from the table row
+            record_number = row.xpath("string(.//td[2])").get().strip()
+            record_link = row.xpath(".//td[2]//a/@href").get()
+            record_type = row.xpath("string(.//td[3])").get().strip()
+            project_name = row.xpath("string(.//td[4])").get().strip()
+            address = row.xpath("string(.//td[5])").get().strip()
+
+            # make sure that the data is as expected
+            assert record_number, "Record number not found"
+            assert record_link, "Record link not found"
+            assert record_type, "Record type not found"
+            assert address, "Address not found"
+
+            # convert the relative record_link to an absolute url
+            record_link = response.urljoin(record_link)
+
+            records.append({
+                'record_number': record_number,
+                'record_type': record_type,
+                'project_name': project_name,
+                'address': address,
+                'record_link': record_link
+            })
+
+
+        # make sure that we actually extracted some records and it was a valid table
+        assert records, "No records found in table"
+        return records
