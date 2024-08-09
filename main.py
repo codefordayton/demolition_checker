@@ -21,6 +21,8 @@ class DemoSpider(scrapy.Spider):
         # open_in_browser(response)
 
     def parseResults(self, response):
+        open_in_browser(response)
+        
         results_empty = response.xpath("//div[@id='ctl00_PlaceHolderMain_RecordSearchResultInfo_noDataMessageForSearchResultList_messageBar']").get()
         records_rows = response.xpath("//table[@id='ctl00_PlaceHolderMain_dgvPermitList_gdvPermitList']/tr")
 
