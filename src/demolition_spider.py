@@ -1,21 +1,40 @@
 from scrapy import Spider
 from scrapy.http import FormRequest
 from scrapy.utils.response import open_in_browser
+from enum import Enum
+
+
+class PermitType(str, Enum):
+    commercial_wrecking_permit = 'Building/Wrecking/Commercial/NA'
+    residential_wrecking_permit = 'Building/Wrecking/Residential/NA'
 
 class DemolitionSpider(Spider):
     name = 'DemolitionSpider'
     start_urls = ['https://aca-prod.accela.com/DAYTON/Cap/CapHome.aspx?module=Building&TabName=Building']
+    permit_type: PermitType = PermitType.commercial_wrecking_permit
+    start_date: str = '08/01/2023' # strftime('%m/%d/%Y')
+    
+    # TODO type checking around start_date, it should be a date not a str
+    def __init__(self, permit_type: PermitType = None, start_date: str = None, *args, **kwargs):
+        super(DemolitionSpider, self).__init__(*args, **kwargs)
+        if permit_type:
+            self.permit_type = permit_type
+        if start_date:
+            self.start_date = start_date
 
     def parse(self, response):
-        
-        yield FormRequest.from_response(
-            response,
-            formdata = {
+        form_data = {
                 'ctl00$ScriptManager1': 'ctl00$PlaceHolderMain$updatePanel|ctl00$PlaceHolderMain$btnNewSearch',
                 '__EVENTTARGET': 'ctl00$PlaceHolderMain$btnNewSearch',
-                'ctl00$PlaceHolderMain$generalSearchForm$ddlGSPermitType': 'Building/Wrecking/Residential/NA',
-                'ctl00$PlaceHolderMain$generalSearchForm$txtGSStartDate': '08/01/2023', # TODO: this should be yesterday
-                '__VIEWSTATE': response.css('input#__VIEWSTATE::attr(value)').extract_first()},
+                'ctl00$PlaceHolderMain$generalSearchForm$ddlGSPermitType': self.permit_type.value,
+                'ctl00$PlaceHolderMain$generalSearchForm$txtGSStartDate': self.start_date,
+        }
+        print(f"Setting the following formdata:\n{form_data}")
+        form_data['__VIEWSTATE'] = response.css('input#__VIEWSTATE::attr(value)').extract_first()
+
+        yield FormRequest.from_response(
+            response,
+            formdata = form_data,
             clickdata={'id': 'ctl00_PlaceHolderMain_btnNewSearch'},
             callback=self.parseResults)
         # open_in_browser(response)
