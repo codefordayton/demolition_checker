@@ -6,13 +6,11 @@ This is a small project to support [Preservation Dayton](https://www.preservatio
 
 This is a small application that submits a webform request daily to the [Online Permit Search for Building Services](https://aca-prod.accela.com/DAYTON/Cap/CapHome.aspx?module=Building&TabName=Building). It submits 2 requests, one for commercial and one residential properties. If there are results, it emails them to an interested party.
 
-## Installation
+## Running the spider
 
 This application is a small Python application that uses the [Scrapy](https://scrapy.org/) framework to submit webforms. It analyzes the results and, if necessary, sends an email via the MailTrap api.
 
-You need a Python 3 environment to run this, unless someone wants to submit a PR to Dockerize the application. :)
-
-To run it:
+### Using Python 3
 
 * Create a virtual environment using a Python 3 (I used 3.11.6) with `virtualenv env -ppython3`
 
@@ -21,6 +19,10 @@ To run it:
 * Install the requirements with `pip install -r requirements.txt`
 
 The application can be run via the scrapy command: `scrapy runspider main.py`
+
+### Using Docker
+
+Run `docker-compose up --build` to run the spider within a container.
 
 ## Next Steps
 

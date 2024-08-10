@@ -1,0 +1,7 @@
+services:
+  demolition-checker:
+    environment:
+      - ENV=local
+    build: .
+    volumes:
+      - './main.py:/main.py'
