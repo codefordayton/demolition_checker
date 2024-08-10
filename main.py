@@ -29,10 +29,10 @@ class DemoSpider(scrapy.Spider):
         # Make sure that the page format is as expected.
         # we expect that there's either no records with a message explaining that, or there are records without a message.
         # If that's not true, it's likely that the page format has changed and this spider needs to be updated.
-        if results_empty:
-            assert len(records_rows) == 0, "Expected no records, but records were found"
-        else:
-            assert len(records_rows) > 0, "Expected records, but none were found"
+        if results_empty and len(records_rows) > 0:
+            raise Exception("Expected no records, but records were found")
+        elif not results_empty and len(records_rows) == 0:
+            raise Exception("Expected records, but none were found")
 
         # if there are records, extract them
         if records_rows:
@@ -60,10 +60,8 @@ class DemoSpider(scrapy.Spider):
             address = row.xpath("string(.//td[5])").get().strip()
 
             # make sure that the data is as expected
-            assert record_number, "Record number not found"
-            assert record_link, "Record link not found"
-            assert record_type, "Record type not found"
-            assert address, "Address not found"
+            if not record_number or not record_link or not record_type or not address:
+                raise Exception("Unexpected table format")
 
             # convert the relative record_link to an absolute url
             record_link = response.urljoin(record_link)
@@ -78,5 +76,7 @@ class DemoSpider(scrapy.Spider):
 
 
         # make sure that we actually extracted some records and it was a valid table
-        assert records, "No records found in table"
+        if len(records) == 0:
+            raise Exception("No records found in table")
+
         return records
