@@ -1,3 +1,4 @@
+from typing import Any
 from scrapy import Spider
 from scrapy.http import FormRequest
 from scrapy.utils.response import open_in_browser
@@ -8,6 +9,16 @@ class PermitType(str, Enum):
     commercial_wrecking_permit = 'Building/Wrecking/Commercial/NA'
     residential_wrecking_permit = 'Building/Wrecking/Residential/NA'
 
+class BuildingServicesSearchResult():
+    # TODO validation (regex?)
+    record_number: str # e.g. WRK2024R-00138
+    record_details_link: str # URL to the record details page
+    record_type: PermitType
+    project_name: str | None
+    address: str
+    expiration_date: Any | None # I haven't found any records w/ this set yet
+    short_notes: str | None
+
 class DemolitionSpider(Spider):
     name = 'DemolitionSpider'
     start_urls = ['https://aca-prod.accela.com/DAYTON/Cap/CapHome.aspx?module=Building&TabName=Building']
@@ -15,6 +26,7 @@ class DemolitionSpider(Spider):
     start_date: str = '08/01/2023' # strftime('%m/%d/%Y')
     
     # TODO type checking around start_date, it should be a date not a str
+    # TODO the results are actually paginated, so right now we're only grabbing the first page
     def __init__(self, permit_type: PermitType = None, start_date: str = None, *args, **kwargs):
         super(DemolitionSpider, self).__init__(*args, **kwargs)
         if permit_type:
@@ -61,7 +73,7 @@ class DemolitionSpider(Spider):
 
 
     def extractRecords(self, response, records_rows):
-        records = []
+        records: list[BuildingServicesSearchResult] = []
         for row in records_rows:
             # if this row is a header row, skip it
             if row.xpath(".//th"):
@@ -71,31 +83,21 @@ class DemolitionSpider(Spider):
             if row.xpath(".//table"):
                 continue
 
-            # select the data we want from the table row
-            record_number = row.xpath("string(.//td[2])").get().strip()
-            record_link = row.xpath(".//td[2]//a/@href").get()
-            record_type = row.xpath("string(.//td[3])").get().strip()
-            project_name = row.xpath("string(.//td[4])").get().strip()
-            address = row.xpath("string(.//td[5])").get().strip()
-
-            # make sure that the data is as expected
-            assert record_number, "Record number not found"
-            assert record_link, "Record link not found"
-            assert record_type, "Record type not found"
-            assert address, "Address not found"
-
             # convert the relative record_link to an absolute url
-            record_link = response.urljoin(record_link)
+            record_link = response.urljoin(row.xpath(".//td[2]//a/@href").get())
 
-            records.append({
-                'record_number': record_number,
-                'record_type': record_type,
-                'project_name': project_name,
-                'address': address,
-                'record_link': record_link
-            })
-
-
-        # make sure that we actually extracted some records and it was a valid table
-        assert records, "No records found in table"
+            # select the data we want from the table row
+            records.append(
+                BuildingServicesSearchResult(
+                    record_number=row.xpath("string(.//td[2])").get().strip(),
+                    record_link=record_link,
+                    record_type=PermitType[row.xpath("string(.//td[3])").get().strip()],
+                    project_name=row.xpath("string(.//td[4])").get().strip(),
+                    address=row.xpath("string(.//td[5])").get().strip(),
+                    expiration_date=row.xpath("string(.//td[6])").get().strip(),
+                    short_notes=row.xpath("string(.//td[7])").get().strip()
+                )
+            )
+        
+        print(f"Extracted {len(records)} records")
         return records
