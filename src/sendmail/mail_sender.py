@@ -18,9 +18,18 @@ def send_email(args):
     dataTemplate = env.get_template("record.html")
 
     templates = []
+    
     # For each record, fill the data template, then put the data into the main template
     for record in args:    
-        templates.append(dataTemplate.render(record_number=record["record_number"], record_type=record["record_type"], project_name=record["project_name"], address=record["address"], record_link=record["record_link"]))
+        templates.append(dataTemplate.render(
+        record_number=record.record_number,
+        record_type=record.record_type.value,
+        project_name=record.project_name,
+        address=record.address,
+        expiration_date=record.expiration_date,
+        short_notes=record.short_notes,
+        record_link=record.record_details_link
+    ))
 
 
     filled_template = mainTemplate.render(record=" ".join(templates))

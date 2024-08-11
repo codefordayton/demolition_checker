@@ -1,6 +1,22 @@
-<p>Record Number: {{record_number}}</p>
-<p>Record Type: {{record_type}}</p>
-<p>Project Name: {{project_name}}</p>
-<p>Address: {{address}}</p>
-<p>Record Link: {{record_link}}</p>
+{% if record_number %}
+<p>Record Number: {{ record_number }}</p>
+{% endif %}
+{% if record_type %}
+<p>Record Type: {{ record_type }}</p>
+{% endif %}
+{% if project_name %}
+<p>Project Name: {{ project_name }}</p>
+{% endif %}
+{% if address %}
+<p>Address: {{ address }}</p>
+{% endif %}
+{% if expiration_date %}
+<p>Expiration Date: {{ expiration_date }}</p>
+{% endif %}
+{% if short_notes %}
+<p>Short Notes: {{ short_notes }}</p>
+{% endif %}
+{% if record_link %}
+<p>Record Link: <a href="{{ record_link }}">{{ record_link }}</a></p>
+{% endif %}
 <br/>
