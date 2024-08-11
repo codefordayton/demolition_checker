@@ -14,9 +14,16 @@ def send_email(args):
     MAILTRAP_BCC_ADDRESS = os.environ.get("MAILTRAP_BCC_ADDRESS")
 
    
-    template = env.get_template("template.html")
+    mainTemplate = env.get_template("template.html")
+    dataTemplate = env.get_template("record.html")
 
-    filled_template = template.render(record_number=args["record_number"], record_type=args["record_type"], project_name=args["project_name"], address=args["address"], record_link=args["record_link"])
+    templates = []
+    # For each record, fill the data template, then put the data into the main template
+    for record in args:    
+        templates.append(dataTemplate.render(record_number=record["record_number"], record_type=record["record_type"], project_name=record["project_name"], address=record["address"], record_link=record["record_link"]))
+
+
+    filled_template = mainTemplate.render(record=" ".join(templates))
 
     # print(filled_template)
 

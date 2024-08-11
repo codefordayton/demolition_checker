@@ -99,7 +99,5 @@ class DemolitionSpider(Spider):
         if len(records) == 0:
             raise Exception("No records found in table")
         else:
-            # send an email for each record
-            for record in records:
-                mail_sender.send_email(record)
+            mail_sender.send_email(records)
         return records

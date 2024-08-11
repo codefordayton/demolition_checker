@@ -5,10 +5,7 @@
         <title>Demolition Notice</title>
     </head>
     <body>
-        <p>Record Number: {{record_number}}</p>
-        <p>Record Type: {{record_type}}</p>
-        <p>Project Name: {{project_name}}</p>
-        <p>Address: {{address}}</p>
-        <p>Record Link: {{record_link}}</p>
+        {{record | safe}}
     </body>
 </html>
+
