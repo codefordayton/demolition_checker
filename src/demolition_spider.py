@@ -38,17 +38,22 @@ class DemolitionSpider(Spider):
 
     permit_type: PermitType = PermitType.commercial_wrecking_permit
     start_date: str = "08/01/2023"  # strftime('%m/%d/%Y')
+    open_in_browser: bool
 
     # TODO type checking around start_date, it should be a date not a str
     # TODO the results are actually paginated, so right now we're only grabbing the first page
     def __init__(
-        self, permit_type: PermitType = None, start_date: str = None, *args, **kwargs
+        self,
+        permit_type: PermitType = None,
+        start_date: str = None,
+        open_in_browser: bool = False,
+        *args,
+        **kwargs,
     ):
         super(DemolitionSpider, self).__init__(*args, **kwargs)
-        if permit_type:
-            self.permit_type = permit_type
-        if start_date:
-            self.start_date = start_date
+        self.permit_type = permit_type or self.permit_type
+        self.start_date = start_date or self.start_date
+        self.open_in_browser = open_in_browser
 
     def parse(self, response: Response):
         form_data = {
@@ -70,7 +75,8 @@ class DemolitionSpider(Spider):
         )
 
     def parseResults(self, response: Response):
-        open_in_browser(response)
+        if self.open_in_browser:
+            open_in_browser(response)
 
         results_empty = response.xpath(
             "//div[@id='ctl00_PlaceHolderMain_RecordSearchResultInfo_noDataMessageForSearchResultList_messageBar']"
