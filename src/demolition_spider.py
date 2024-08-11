@@ -82,10 +82,10 @@ class DemolitionSpider(Spider):
         # Make sure that the page format is as expected.
         # we expect that there's either no records with a message explaining that, or there are records without a message.
         # If that's not true, it's likely that the page format has changed and this spider needs to be updated.
-        if results_empty:
-            assert len(records_rows) == 0, "Expected no records, but records were found"
-        else:
-            assert len(records_rows) > 0, "Expected records, but none were found"
+        if results_empty and len(records_rows) > 0:
+            raise Exception("Expected no records, but records were found")
+        elif not results_empty and len(records_rows) == 0:
+            raise Exception("Expected records, but none were found")
 
         # if there are records, extract them
         if records_rows:
