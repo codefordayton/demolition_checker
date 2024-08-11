@@ -16,7 +16,8 @@ RUN --mount=type=cache,target=/root/.cache \
 # Copy code 
 RUN mkdir /demolition-checker
 WORKDIR /demolition-checker
+COPY ./src src
 COPY ./main.py .
 
 # Run the spider
-ENTRYPOINT ["scrapy", "runspider", "main.py"]
+ENTRYPOINT ["python", "main.py"]

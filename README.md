@@ -10,17 +10,43 @@ This is a small application that submits a webform request daily to the [Online 
 
 This application is a small Python application that uses the [Scrapy](https://scrapy.org/) framework to submit webforms. It analyzes the results and, if necessary, sends an email via the MailTrap api.
 
-### Using Python 3
+You can run this application within a Docker container, or create a virtual environment and run it using your local Python 3 installation.
 
-* Create a virtual environment using a Python 3 (I used 3.11.6) with `virtualenv env -ppython3`
+### Setup
 
-* Activate the environment with `source env/bin/activate`
+First, create and activate a virtual environment.
 
-* Install the requirements with `pip install -r requirements.txt`
+Virtualenv: 
 
-The application can be run via the scrapy command: `scrapy runspider main.py`
+```
+virtualenv env -ppython3
+source env/bin/activate
+```
 
-### Using Docker
+venv:
+
+```
+venv .venv
+.\.venv\Scripts\activate
+```
+
+Once you've activated your virtual environment, run
+
+```
+pip install -r requirements.txt
+```
+
+to install `scrapy` and the other dependencies required by this application.
+
+### Running the application
+
+```
+python main.py
+```
+
+
+
+### Docker
 
 Run `docker-compose up --build` to run the spider within a container.
 
