@@ -2,6 +2,7 @@ from scrapy import Spider
 from scrapy.http import FormRequest
 from scrapy.utils.response import open_in_browser
 from enum import Enum
+from .sendmail import mail_sender
 
 
 class PermitType(str, Enum):
@@ -97,4 +98,8 @@ class DemolitionSpider(Spider):
         # make sure that we actually extracted some records and it was a valid table
         if len(records) == 0:
             raise Exception("No records found in table")
+        else:
+            # send an email for each record
+            for record in records:
+                mail_sender.send_email(record)
         return records
