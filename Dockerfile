@@ -13,7 +13,7 @@ COPY /requirements.txt ./
 RUN --mount=type=cache,target=/root/.cache \
     pip install -r requirements.txt
 
-# Copy code 
+# Copy code
 RUN mkdir /demolition-checker
 WORKDIR /demolition-checker
 COPY ./src src

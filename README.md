@@ -16,7 +16,7 @@ You can run this application within a Docker container, or create a virtual envi
 
 First, create and activate a virtual environment.
 
-Virtualenv: 
+Virtualenv:
 
 ```
 virtualenv env -ppython3
@@ -37,6 +37,16 @@ pip install -r requirements.txt
 ```
 
 to install `scrapy` and the other dependencies required by this application.
+
+#### Developers
+
+You'll also need to run
+
+```
+pip install -r requirements-dev.txt
+```
+
+to install the dependencies for `pre-commit`, which is needed to commit code.
 
 ### Running the application
 
