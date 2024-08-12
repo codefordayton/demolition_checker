@@ -1,6 +1,5 @@
 import os
 import mailtrap as mt
-from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 env = Environment(
     loader=FileSystemLoader("src/sendmail"),
