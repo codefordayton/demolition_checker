@@ -6,19 +6,33 @@ from scrapy.utils.project import get_project_settings
 from src.sendmail import mail_sender
 from scrapy import signals
 import logging
+import logging.config
+from datetime import date
+from datetime import timedelta
 
-configure_logging(install_root_handler=False)
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
 
+# N.B. that the ordering of these commands is intentional
 settings = get_project_settings()
 configure_logging(settings)
+
+for module in [
+    "scrapy.addons",
+    "scrapy.core.engine",
+    "scrapy.crawler",
+    "scrapy.downloadermiddlewares.redirect",
+    "scrapy.extensions.logstats",
+    "scrapy.extensions.telnet",
+    "scrapy.middleware",
+    "scrapy.statscollectors",
+    "urllib3.connectionpool",
+]:
+    logging.getLogger(module).setLevel(logging.WARN)
+
 runner = CrawlerRunner(settings)
+logger = logging.getLogger(__name__)
+
 
 all_records = []
-
-logger = logging.getLogger(__name__)
 
 
 def spider_closed(spider, reason):
@@ -34,24 +48,51 @@ def spider_closed(spider, reason):
 
 
 @defer.inlineCallbacks
-def crawl():
-    for permit_type in [
-        PermitType.commercial_wrecking_permit,
-        PermitType.residential_wrecking_permit,
-    ]:
+def crawl(start_date: str, open_in_browser: bool, permit_types: list[PermitType]):
+    for permit_type in permit_types:
         crawler = runner.create_crawler(DemolitionSpider)
         crawler.signals.connect(spider_closed, signal=signals.spider_closed)
-        yield runner.crawl(crawler, permit_type=permit_type, start_date="08/01/2023")
+
+        yield runner.crawl(
+            crawler,
+            permit_type=permit_type,
+            start_date=start_date,
+            open_in_browser=open_in_browser,
+        )
 
     reactor.stop()
 
 
-def main():
-    d = crawl()
+def main(start_date: str, open_in_browser: bool):
+    permit_types = [
+        PermitType.commercial_wrecking_permit,
+        PermitType.residential_wrecking_permit,
+    ]
+    d = crawl(start_date, open_in_browser, permit_types)
     d.addCallback(lambda _: logger.info(f"All records: {len(all_records)}"))
-    d.addCallback(lambda _: mail_sender.send_email(all_records))
+    d.addCallback(
+        lambda _: mail_sender.send_email(all_records, start_date, permit_types)
+    )
     reactor.run()
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    # Note that start_date defaults to a week ago
+    parser.add_argument(
+        "--start_date",
+        required=False,
+        default=(date.today() - timedelta(weeks=1)).strftime("%m/%d/%Y"),
+        help="Return permits submitted on or since this date",
+    )
+    parser.add_argument(
+        "--open_in_browser",
+        required=False,
+        default=False,
+        help="Open scraped results in browser",
+    )
+    args = parser.parse_args()
+
+    main(start_date=args.start_date, open_in_browser=args.open_in_browser)

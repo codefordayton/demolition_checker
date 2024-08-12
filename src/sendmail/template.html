@@ -19,9 +19,12 @@
         </style>
     </head>
     <body>
-        <p>Please find the report details below:</p>
 
-        <p>Report Interface: <a href="https://aca-prod.accela.com/DAYTON/Cap/CapHome.aspx?module=Building&TabName=Building">Click here to access the report interface</a></p>
+        <p>This email contains the following record types submitted since {{start_date}}:</p>
+        {% for permit_type in permit_types %}
+            {{ permit_type.value }} <br />
+        {% endfor %}
+        <p>For details, see the <a href="https://aca-prod.accela.com/DAYTON/Cap/CapHome.aspx?module=Building&TabName=Building">Building Services Portal</a>.</p>
 
         {% if records %}
             <h2>Discovered Records:</h2>
