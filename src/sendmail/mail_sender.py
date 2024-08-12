@@ -1,12 +1,14 @@
 import os
 import mailtrap as mt
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from src.demolition_spider import BuildingServicesSearchResult
+
 env = Environment(
     loader=FileSystemLoader("src/sendmail"),
     autoescape=select_autoescape()
 )
 
-def send_email(args):
+def send_email(records: list[BuildingServicesSearchResult]):
     MAILTRAP_API_TOKEN = os.environ.get("MAILTRAP_API_TOKEN")
     MAILTRAP_SENDER_ADDRESS = os.environ.get("MAILTRAP_SENDER_ADDRESS") 
     MAILTRAP_TO_ADDRESS = os.environ.get("MAILTRAP_TO_ADDRESS")
@@ -16,14 +18,11 @@ def send_email(args):
     mainTemplate = env.get_template("template.html")
     dataTemplate = env.get_template("record.html")
 
-    templates = []
     
     # For each record, fill the data template, then put the data into the main template
-    for record in args:    
-        templates.append(dataTemplate.render(record=record))
-
-
-    filled_template = mainTemplate.render(records=templates)
+    filled_template = mainTemplate.render(
+        records=[dataTemplate.render(record=record) for record in records]
+    )
 
     # print(filled_template)
 
