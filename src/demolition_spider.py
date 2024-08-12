@@ -1,31 +1,8 @@
-from dataclasses import dataclass
 import json
-from typing import Any
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 from scrapy.utils.response import open_in_browser
-from enum import Enum
-
-
-class PermitType(str, Enum):
-    commercial_wrecking_permit = "Building/Wrecking/Commercial/NA"
-    residential_wrecking_permit = "Building/Wrecking/Residential/NA"
-
-
-@dataclass
-class BuildingServicesSearchResult:
-    # TODO validation (regex?)
-    record_number: str  # e.g. WRK2024R-00138
-    record_details_link: str  # URL to the record details page
-    record_type: PermitType
-    project_name: str | None
-    address: str
-    expiration_date: Any | None  # I haven't found any records w/ this yet
-    short_notes: str | None
-
-    def __str__(self):
-        return f"{self.record_type.value}:\n{self.record_number} - {self.project_name} - {self.address}"
-
+from .schema import BuildingServicesSearchResult, PermitType
 
 class DemolitionSpider(Spider):
     name = "DemolitionSpider"
@@ -47,6 +24,7 @@ class DemolitionSpider(Spider):
         permit_type: PermitType = None,
         start_date: str = None,
         open_in_browser: bool = False,
+        records: list[BuildingServicesSearchResult] = [],
         *args,
         **kwargs,
     ):
@@ -54,6 +32,7 @@ class DemolitionSpider(Spider):
         self.permit_type = permit_type or self.permit_type
         self.start_date = start_date or self.start_date
         self.open_in_browser = open_in_browser
+        self.records = []
 
     def parse(self, response: Response):
         form_data = {
@@ -97,6 +76,7 @@ class DemolitionSpider(Spider):
         if records_rows:
             try:
                 records = self.extract_records(response, records_rows)
+                self.records.extend(records)
                 self.logger.info(f"Extracted {len(records)} records")
                 for record in records:
                     self.logger.info(record)

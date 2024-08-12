@@ -1,0 +1,43 @@
+<tr>
+    {% if record.record_number %}
+        <td>{{ record.record_number }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record.record_type %}
+        <td>{{ record.record_type.value }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record.project_name %}
+        <td>{{ record.project_name }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record.address %}
+        <td>{{ record.address }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record.expiration_date %}
+        <td>{{ record.expiration_date }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record.short_notes %}
+        <td>{{ record.short_notes }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record.record_details_link %}
+        <td><a href="{{ record.record_details_link }}">View Record</a></td>
+    {% else %}
+        <td></td>
+    {% endif %}
+</tr>
