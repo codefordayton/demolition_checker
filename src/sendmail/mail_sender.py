@@ -40,9 +40,9 @@ def send_email(records: list[BuildingServicesSearchResult]):
         client.send(mail)
     except mt.exceptions.AuthorizationError as e:
         # Handle the authorization error here
-        return {"error": f"Mailtrap authorization error, {MAILTRAP_SENDER_ADDRESS}, {MAILTRAP_TO_ADDRESS}", "body": args, "filled_template": filled_template}
+        return {"error": f"Mailtrap authorization error, {MAILTRAP_SENDER_ADDRESS}, {MAILTRAP_TO_ADDRESS}", "body": records, "filled_template": filled_template}
 
-    return {"body": args}
+    return {"body": records}
 
     
 
