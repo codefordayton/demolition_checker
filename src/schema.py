@@ -20,4 +20,4 @@ class BuildingServicesSearchResult:
     short_notes: str | None
 
     def __str__(self):
-        return f"{self.record_type.value}:\n{self.record_number} - {self.project_name} - {self.address}"
+        return f"\n\t{self.record_type.value}:\n\t{self.record_number} - {self.project_name} - {self.address}"
