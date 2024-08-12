@@ -24,6 +24,7 @@ class DemolitionSpider(Spider):
         permit_type: PermitType = None,
         start_date: str = None,
         open_in_browser: bool = False,
+        records: list[BuildingServicesSearchResult] = [],
         *args,
         **kwargs,
     ):
@@ -31,6 +32,7 @@ class DemolitionSpider(Spider):
         self.permit_type = permit_type or self.permit_type
         self.start_date = start_date or self.start_date
         self.open_in_browser = open_in_browser
+        self.records = []
 
     def parse(self, response: Response):
         form_data = {
@@ -74,6 +76,7 @@ class DemolitionSpider(Spider):
         if records_rows:
             try:
                 records = self.extract_records(response, records_rows)
+                self.records.extend(records)
                 self.logger.info(f"Extracted {len(records)} records")
                 for record in records:
                     self.logger.info(record)
