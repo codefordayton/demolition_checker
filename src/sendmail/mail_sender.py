@@ -32,7 +32,7 @@ def send_email(args):
     ))
 
 
-    filled_template = mainTemplate.render(record=" ".join(templates))
+    filled_template = mainTemplate.render(records=templates)
 
     # print(filled_template)
 

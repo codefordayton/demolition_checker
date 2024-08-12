@@ -1,22 +1,43 @@
-{% if record_number %}
-<p>Record Number: {{ record_number }}</p>
-{% endif %}
-{% if record_type %}
-<p>Record Type: {{ record_type }}</p>
-{% endif %}
-{% if project_name %}
-<p>Project Name: {{ project_name }}</p>
-{% endif %}
-{% if address %}
-<p>Address: {{ address }}</p>
-{% endif %}
-{% if expiration_date %}
-<p>Expiration Date: {{ expiration_date }}</p>
-{% endif %}
-{% if short_notes %}
-<p>Short Notes: {{ short_notes }}</p>
-{% endif %}
-{% if record_link %}
-<p>Record Link: <a href="{{ record_link }}">{{ record_link }}</a></p>
-{% endif %}
-<br/>
+<tr>
+    {% if record_number %}
+        <td>{{ record_number }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record_type %}
+        <td>{{ record_type }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if project_name %}
+        <td>{{ project_name }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if address %}
+        <td>{{ address }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if expiration_date %}
+        <td>{{ expiration_date }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if short_notes %}
+        <td>{{ short_notes }}</td>
+    {% else %}
+        <td></td>
+    {% endif %}
+
+    {% if record_link %}
+        <td><a href="{{ record_link }}">View Record</a></td>
+    {% else %}
+        <td></td>
+    {% endif %}
+</tr>

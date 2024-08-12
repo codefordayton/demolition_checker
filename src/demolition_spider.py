@@ -135,5 +135,5 @@ class DemolitionSpider(Spider):
                     short_notes=row.xpath("string(.//td[7])").get().strip(),
                 )
             )
-            mail_sender.send_email(records)
+        mail_sender.send_email(records)
         return records

@@ -3,9 +3,47 @@
     <head>
         <meta charset="UTF-8">
         <title>Demolition Notice</title>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+        </style>
     </head>
     <body>
-        {{record | safe}}
+        <p>Please find the report details below:</p>
+
+        {% if records %}
+            <h2>Discovered Records:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Record Number</th>
+                        <th>Record Type</th>
+                        <th>Project Name</th>
+                        <th>Address</th>
+                        <th>Expiration Date</th>
+                        <th>Short Notes</th>
+                        <th>Record Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        {{ record | safe }}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No records found.</p>
+        {% endif %}
     </body>
 </html>
 
