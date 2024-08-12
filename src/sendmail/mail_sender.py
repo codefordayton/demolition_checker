@@ -1,7 +1,7 @@
 import os
 import mailtrap as mt
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from src.demolition_spider import BuildingServicesSearchResult
+from src.schema import BuildingServicesSearchResult
 
 env = Environment(
     loader=FileSystemLoader("src/sendmail"),
