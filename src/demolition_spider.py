@@ -4,6 +4,7 @@ from scrapy.http import FormRequest, Response
 from scrapy.utils.response import open_in_browser
 from .schema import BuildingServicesSearchResult, PermitType
 
+
 class DemolitionSpider(Spider):
     name = "DemolitionSpider"
     start_urls = [

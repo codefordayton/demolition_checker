@@ -2,6 +2,7 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Any
 
+
 class PermitType(str, Enum):
     commercial_wrecking_permit = "Building/Wrecking/Commercial/NA"
     residential_wrecking_permit = "Building/Wrecking/Residential/NA"
@@ -20,4 +21,3 @@ class BuildingServicesSearchResult:
 
     def __str__(self):
         return f"{self.record_type.value}:\n{self.record_number} - {self.project_name} - {self.address}"
-
