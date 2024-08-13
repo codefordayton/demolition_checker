@@ -8,7 +8,8 @@
       "runtime": "V2",
       "numReplicas": 1,
       "sleepApplication": true,
-      "restartPolicyType": "ON_FAILURE",
+      "cronSchedule": "0 12 * * *",
+      "restartPolicyType": "NEVER",
       "restartPolicyMaxRetries": 10
     }
   }
