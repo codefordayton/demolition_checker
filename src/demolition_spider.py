@@ -66,12 +66,14 @@ class DemolitionSpider(Spider):
         Parses and follows an ASP.NET postback link
         """
 
-        m = re.search(r"__doPostBack\('(.+)'\s*,\s*'(.*)'\)", href)
-        event_target, event_argument = m.groups()
+        m = re.search(
+            r"__doPostBack\('(?P<event_target>.+)'\s*,\s*'(?P<event_argument>.*)'\)",
+            href,
+        )
         return self.follow_postback(
             response,
-            event_target=event_target,
-            event_argument=event_argument,
+            event_target=m.group("event_target"),
+            event_argument=m.group("event_argument"),
             **kwargs,
         )
 
