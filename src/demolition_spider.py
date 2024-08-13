@@ -1,4 +1,4 @@
-import json
+import re
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 from scrapy.utils.response import open_in_browser
@@ -18,7 +18,6 @@ class DemolitionSpider(Spider):
     open_in_browser: bool
 
     # TODO type checking around start_date, it should be a date not a str
-    # TODO the results are actually paginated, so right now we're only grabbing the first page
     def __init__(
         self,
         permit_type: PermitType = None,
@@ -34,22 +33,59 @@ class DemolitionSpider(Spider):
         self.open_in_browser = open_in_browser
         self.records = []
 
-    def parse(self, response: Response):
-        form_data = {
-            "ctl00$ScriptManager1": "ctl00$PlaceHolderMain$updatePanel|ctl00$PlaceHolderMain$btnNewSearch",
-            "__EVENTTARGET": "ctl00$PlaceHolderMain$btnNewSearch",
-            "ctl00$PlaceHolderMain$generalSearchForm$ddlGSPermitType": self.permit_type.value,
-            "ctl00$PlaceHolderMain$generalSearchForm$txtGSStartDate": self.start_date,
-        }
-        self.logger.debug(f"FORMDATA:\n{json.dumps(form_data)}")
-        form_data["__VIEWSTATE"] = response.css(
-            "input#__VIEWSTATE::attr(value)"
-        ).extract_first()
+    def follow_postback(
+        self,
+        response: Response,
+        event_target: str = "",
+        event_argument: str = "",
+        formdata: dict = None,
+        **kwargs,
+    ):
+        """
+        Follows an ASP.NET postback event
+        """
 
-        yield FormRequest.from_response(
+        return FormRequest.from_response(
             response,
-            formdata=form_data,
-            clickdata={"id": "ctl00_PlaceHolderMain_btnNewSearch"},
+            formdata={
+                "__EVENTTARGET": event_target,
+                "__EVENTARGUMENT": event_argument,
+                "__VIEWSTATE": response.css("input#__VIEWSTATE::attr(value)").get(),
+                **(formdata or {}),
+            },
+            **kwargs,
+        )
+
+    def follow_postback_link(
+        self,
+        response: Response,
+        href: str = "",
+        **kwargs,
+    ):
+        """
+        Parses and follows an ASP.NET postback link
+        """
+
+        m = re.search(
+            r"__doPostBack\('(?P<event_target>.+)'\s*,\s*'(?P<event_argument>.*)'\)",
+            href,
+        )
+        return self.follow_postback(
+            response,
+            event_target=m.group("event_target"),
+            event_argument=m.group("event_argument"),
+            **kwargs,
+        )
+
+    def parse(self, response: Response):
+        yield self.follow_postback(
+            response,
+            event_target="ctl00$PlaceHolderMain$btnNewSearch",
+            event_argument="",
+            formdata={
+                "ctl00$PlaceHolderMain$generalSearchForm$ddlGSPermitType": self.permit_type.value,
+                "ctl00$PlaceHolderMain$generalSearchForm$txtGSStartDate": self.start_date,
+            },
             callback=self.parseResults,
         )
 
@@ -72,18 +108,26 @@ class DemolitionSpider(Spider):
         elif not results_empty and len(records_rows) == 0:
             raise Exception("Expected records, but none were found")
 
-        # if there are records, extract them
-        if records_rows:
-            try:
-                records = self.extract_records(response, records_rows)
-                self.records.extend(records)
-                self.logger.info(f"Extracted {len(records)} records")
-                for record in records:
-                    self.logger.info(record)
-            except Exception as e:
-                self.logger.error(f"Error extracting records: {e}")
-        else:
+        if results_empty:
             self.logger.info("No records found")
+            return
+
+        records = self.extract_records(response, records_rows)
+        self.records.extend(records)
+        self.logger.info(f"Extracted {len(records)} records")
+        for record in records:
+            self.logger.info(record)
+
+        # if there are more pages, follow the next page link
+        next_button = response.xpath(
+            "//td[@class='aca_pagination_td aca_pagination_PrevNext']/a[contains(text(), 'Next')]"
+        )
+        if next_button:
+            yield self.follow_postback_link(
+                response,
+                href=next_button.xpath("@href").get(),
+                callback=self.parseResults,
+            )
 
     def extract_records(
         self, response: Response, records_rows
