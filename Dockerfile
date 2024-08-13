@@ -10,8 +10,7 @@ FROM python-base as demolition-checker
 
 # Install dependencies
 COPY /requirements.txt ./
-RUN --mount=type=cache,target=/root/.cache \
-    pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Copy code
 RUN mkdir /demolition-checker
