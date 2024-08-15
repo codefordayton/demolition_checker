@@ -88,7 +88,8 @@ if __name__ == "__main__":
         help="Return permits submitted on or since this date",
     )
     parser.add_argument(
-        "--open_in_browser", action= "store_true",
+        "--open_in_browser",
+        action="store_true",
         required=False,
         default=False,
         help="Open scraped results in browser",
