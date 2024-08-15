@@ -84,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--start_date",
         required=False,
-        default=(date.today() - timedelta(weeks=1)).strftime("%m/%d/%Y"),
+        default=(date.today() - timedelta(days=1)).strftime("%m/%d/%Y"),
         help="Return permits submitted on or since this date",
     )
     parser.add_argument(
