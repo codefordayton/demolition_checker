@@ -1,8 +1,10 @@
+import logging
 import re
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 from scrapy.utils.response import open_in_browser
 from .schema import BuildingServicesSearchResult, PermitType
+
 
 class DemolitionSpider(Spider):
     name = "DemolitionSpider"
@@ -10,12 +12,14 @@ class DemolitionSpider(Spider):
         "https://aca-prod.accela.com/DAYTON/Cap/CapHome.aspx?module=Building&TabName=Building"
     ]
     custom_settings = {
-        "LOG_LEVEL": "INFO"  # Default is DEBUG
+        "REQUEST_FINGERPRINTER_IMPLEMENTATION": "2.7",  # Hide deprecation warning
     }
 
     permit_type: PermitType = PermitType.commercial_wrecking_permit
     start_date: str = "08/01/2023"  # strftime('%m/%d/%Y')
     open_in_browser: bool
+    # Extracted records are retrieved from this field after the spider has been closed
+    records: list[BuildingServicesSearchResult] = []
 
     # TODO type checking around start_date, it should be a date not a str
     def __init__(
@@ -23,15 +27,18 @@ class DemolitionSpider(Spider):
         permit_type: PermitType = None,
         start_date: str = None,
         open_in_browser: bool = False,
-        records: list[BuildingServicesSearchResult] = [],
         *args,
         **kwargs,
     ):
         super(DemolitionSpider, self).__init__(*args, **kwargs)
+        self.logger.setLevel(logging.INFO)
         self.permit_type = permit_type or self.permit_type
         self.start_date = start_date or self.start_date
         self.open_in_browser = open_in_browser
-        self.records = []
+        self.records.clear()
+        self.logger.info(
+            f"Initializing spider with permit_type {self.permit_type.value} and start_date {self.start_date}"
+        )
 
     def follow_postback(
         self,
@@ -86,10 +93,10 @@ class DemolitionSpider(Spider):
                 "ctl00$PlaceHolderMain$generalSearchForm$ddlGSPermitType": self.permit_type.value,
                 "ctl00$PlaceHolderMain$generalSearchForm$txtGSStartDate": self.start_date,
             },
-            callback=self.parseResults,
+            callback=self.parse_search_results,
         )
 
-    def parseResults(self, response: Response):
+    def parse_search_results(self, response: Response):
         if self.open_in_browser:
             open_in_browser(response)
 
@@ -106,6 +113,7 @@ class DemolitionSpider(Spider):
         if results_empty and len(records_rows) > 0:
             raise Exception("Expected no records, but records were found")
         elif not results_empty and len(records_rows) == 0:
+            # TODO this exception is raised when a single result is found
             raise Exception("Expected records, but none were found")
 
         if results_empty:
