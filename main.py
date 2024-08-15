@@ -80,7 +80,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    # Note that start_date defaults to a week ago
+    # Note that start_date defaults to yesterday
     parser.add_argument(
         "--start_date",
         required=False,
