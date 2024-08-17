@@ -54,7 +54,7 @@ to install the dependencies for `pre-commit`, which is needed to commit code.
 python main.py
 ```
 
-You'll also need to supply the following environment variables, which you can do in `.end.dev`:
+You'll also need to supply the following environment variables, which you can do in `.env.dev`:
 
 ```
 MAILTRAP_API_TOKEN=
