@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from src.demolition_spider import DemolitionSpider, PermitType
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
@@ -9,7 +10,6 @@ import logging
 import logging.config
 from datetime import date
 from datetime import timedelta
-
 
 # N.B. that the ordering of these commands is intentional
 settings = get_project_settings()
@@ -78,6 +78,7 @@ def main(start_date: str, open_in_browser: bool):
 
 if __name__ == "__main__":
     import argparse
+    from os import path
 
     parser = argparse.ArgumentParser()
     # Note that start_date defaults to yesterday
@@ -94,5 +95,9 @@ if __name__ == "__main__":
         help="Open scraped results in browser",
     )
     args = parser.parse_args()
+
+    # Load environment variables
+    if path.isfile(".env.dev"):
+        load_dotenv(dotenv_path=".env.dev")
 
     main(start_date=args.start_date, open_in_browser=args.open_in_browser)
