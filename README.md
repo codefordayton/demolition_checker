@@ -54,7 +54,15 @@ to install the dependencies for `pre-commit`, which is needed to commit code.
 python main.py
 ```
 
+You'll also need to supply the following environment variables, which you can do in `.end.dev`:
 
+```
+MAILTRAP_API_TOKEN=
+MAILTRAP_SENDER_ADDRESS=mailtrap@codefordayton.org
+MAILTRAP_TO_ADDRESS=
+MAILTRAP_CC_ADDRESS=
+MAILTRAP_BCC_ADDRESS=
+```
 
 ### Docker
 
