@@ -44,6 +44,7 @@ You'll also need to run
 
 ```
 pip install -r requirements-dev.txt
+pre-commit
 ```
 
 to install the dependencies for `pre-commit`, which is needed to commit code.
