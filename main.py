@@ -90,7 +90,6 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--open_in_browser",
-        action="default",
         required=False,
         default=False,
         help="Open scraped results in browser",
