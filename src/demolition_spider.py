@@ -93,8 +93,16 @@ class DemolitionSpider(Spider):
                 "ctl00$PlaceHolderMain$generalSearchForm$ddlGSPermitType": self.permit_type.value,
                 "ctl00$PlaceHolderMain$generalSearchForm$txtGSStartDate": self.start_date,
             },
-            callback=self.parse_search_results,
+            callback=self.determine_search_results_page,
         )
+
+    def determine_search_results_page(self, response: Response):
+        if "CapHome" in response.url:
+            return self.parse_search_results(response)
+        elif "CapDetail" in response.url:
+            return self.parse_single_result(response)
+        else:
+            raise Exception(f"Unknown page format: {response.url}")
 
     def parse_search_results(self, response: Response):
         if self.open_in_browser:
@@ -134,8 +142,25 @@ class DemolitionSpider(Spider):
             yield self.follow_postback_link(
                 response,
                 href=next_button.xpath("@href").get(),
-                callback=self.parseResults,
+                callback=self.determine_search_results_page,
             )
+
+    def parse_single_result(self, response: Response):
+        if self.open_in_browser:
+            open_in_browser(response)
+
+        record = BuildingServicesSearchResult(
+            record_number=response.xpath("//*[@id='ctl00_PlaceHolderMain_lblPermitNumber']/text()").get(),
+            record_details_link=response.url,
+            record_type=self.permit_type,
+            project_name=response.xpath('//*[@id="ctl00_PlaceHolderMain_PermitDetailList1_TBPermitDetailTest"]/tr[1]/td[2]/div/span/table/tr/td[2]/text()').get(),
+            address=response.xpath('string(//*[@id="tbl_worklocation"]/tr/td[2])').get().strip(),
+            expiration_date="",
+            short_notes="",
+        )
+        self.records.append(record)
+        
+
 
     def extract_records(
         self, response: Response, records_rows

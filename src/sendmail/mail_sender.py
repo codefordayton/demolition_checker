@@ -23,6 +23,9 @@ def send_email(
     MAILTRAP_BCC_ADDRESS = os.environ.get("MAILTRAP_BCC_ADDRESS")
     MAILTRAP_CC_ADDRESS = os.environ.get("MAILTRAP_CC_ADDRESS")
 
+    if records is None or len(records) == 0:
+        return
+
     for env_var in (
         "MAILTRAP_API_TOKEN",
         "MAILTRAP_SENDER_ADDRESS",
