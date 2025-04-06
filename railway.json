@@ -10,6 +10,7 @@
     "sleepApplication": true,
     "cronSchedule": "0 12 * * *",
     "restartPolicyType": "NEVER",
-    "restartPolicyMaxRetries": 10
+    "restartPolicyMaxRetries": 10,
+    "startCommand": "python main.py"
   }
 }
